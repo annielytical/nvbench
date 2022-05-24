@@ -7,6 +7,7 @@ set(example_srcs
   stream.cu
   throughput.cu
   auto_throughput.cu
+  additional_arguments.cu
 )
 
 # Metatarget for all examples:
@@ -19,7 +20,13 @@ foreach(example_src IN LISTS example_srcs)
   add_executable(${example_name} "${example_src}")
   nvbench_config_target(${example_name})
   target_include_directories(${example_name} PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
-  target_link_libraries(${example_name} PRIVATE nvbench::main)
+  
+  if(example_src MATCHES "additional_arguments.cu")
+    target_link_libraries(${example_name} PRIVATE nvbench::nvbench)
+  else()
+    target_link_libraries(${example_name} PRIVATE nvbench::main)
+  endif()  
+  
   set_target_properties(${example_name} PROPERTIES COMPILE_FEATURES cuda_std_17)
   add_test(NAME ${example_name}
     COMMAND "$<TARGET_FILE:${example_name}>" --timeout 0.1 --min-time 1e-5
